@@ -97,6 +97,56 @@
 
   .edit-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
 
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .refresh-status {
+    flex-basis: 100%;
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    min-height: 14px;
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 1rem;
+  }
+
+  .toggle-row input {
+    width: auto;
+    margin-top: 3px;
+    accent-color: var(--purple);
+  }
+
+  .toggle-row label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.4;
+    cursor: pointer;
+  }
+
+  .toggle-row span {
+    display: block;
+    color: var(--text3);
+    font-family: var(--sans);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
   .section { margin-bottom: 2rem; }
 
   .section-label {
@@ -353,7 +403,11 @@
       <h1>job search dashboard</h1>
       <div class="updated" id="updated-label">last updated: —</div>
     </div>
-    <button class="edit-btn" onclick="openModal()">edit data</button>
+    <div class="header-actions">
+      <button class="edit-btn" onclick="refreshLiveData()">refresh live</button>
+      <button class="edit-btn" onclick="openModal()">edit data</button>
+      <div class="refresh-status" id="refresh-status"></div>
+    </div>
   </div>
 
   <div class="section">
@@ -473,6 +527,14 @@
       </div>
     </div>
 
+    <div class="toggle-row">
+      <input type="checkbox" id="persist-manual">
+      <label for="persist-manual">
+        persist manual changes
+        <span>Leave this off for one-off edits. Turn it on only when you want these manual values saved as the fallback if live data cannot be loaded.</span>
+      </label>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">cancel</button>
       <button class="btn-save" onclick="saveData()">save & update</button>
@@ -480,8 +542,10 @@
   </div>
 </div>
 
+<!-- DASHBOARD_DATA -->
 <script>
-  const STORAGE_KEY = 'job_dash_v1';
+  const STORAGE_KEY = 'job_dash_v1_manual';
+  const PERSIST_MANUAL_KEY = 'job_dash_v1_persist_manual';
 
   const defaults = {
     week: 0, month: 0, total: 0, responses: 0,
@@ -491,15 +555,72 @@
     updatedAt: null
   };
 
-  function loadFromStorage() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? Object.assign({}, defaults, JSON.parse(saved)) : Object.assign({}, defaults);
-    } catch(e) { return Object.assign({}, defaults); }
+  let currentData = Object.assign({}, defaults);
+  let currentSource = 'default';
+
+  function normalizeData(d) {
+    const merged = Object.assign({}, defaults, d || {});
+    merged.weeks = Array.isArray(merged.weeks) ? merged.weeks.slice(0, 5) : defaults.weeks.slice();
+    while (merged.weeks.length < 5) merged.weeks.push(0);
+    return merged;
   }
 
-  function saveToStorage(d) {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch(e) {}
+  function loadManualFromStorage() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? normalizeData(JSON.parse(saved)) : normalizeData(defaults);
+    } catch(e) { return normalizeData(defaults); }
+  }
+
+  function saveManualToStorage(d) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeData(d))); } catch(e) {}
+  }
+
+  function clearManualStorage() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+
+  function shouldPersistManual() {
+    try { return localStorage.getItem(PERSIST_MANUAL_KEY) === 'true'; } catch(e) { return false; }
+  }
+
+  function setPersistManual(value) {
+    try { localStorage.setItem(PERSIST_MANUAL_KEY, value ? 'true' : 'false'); } catch(e) {}
+  }
+
+  function setStatus(message) {
+    const el = document.getElementById('refresh-status');
+    if (el) el.textContent = message || '';
+  }
+
+  async function getLiveData() {
+    try {
+      const response = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!response.ok) throw new Error('no data.json');
+      return { data: normalizeData(await response.json()), source: 'live data.json' };
+    } catch(fetchError) {
+      if (window.__DASHBOARD_DATA__) {
+        return { data: normalizeData(window.__DASHBOARD_DATA__), source: 'embedded live data' };
+      }
+      throw fetchError;
+    }
+  }
+
+  async function refreshLiveData() {
+    setStatus('refreshing live data…');
+    try {
+      const live = await getLiveData();
+      currentData = live.data;
+      currentSource = live.source;
+      updateUI(currentData);
+      setStatus('using ' + live.source);
+    } catch(e) {
+      const manual = loadManualFromStorage();
+      currentData = manual;
+      currentSource = shouldPersistManual() ? 'persisted manual fallback' : 'default fallback';
+      updateUI(currentData);
+      setStatus('live data unavailable; using ' + currentSource);
+    }
   }
 
   let charts = {};
@@ -596,6 +717,7 @@
   }
 
   function updateUI(d) {
+    d = normalizeData(d);
     const rr = d.total > 0 ? Math.round((d.responses / d.total) * 100) : 0;
     document.getElementById('d-week').textContent = d.week;
     document.getElementById('d-month').textContent = d.month;
@@ -609,14 +731,13 @@
     const m = Math.round((d.portHours - h) * 60);
     document.getElementById('d-port-label').innerHTML = h + 'h ' + m + 'm';
     document.getElementById('d-energy-label').innerHTML = d.energy.toFixed(1) + '<span style="font-size:14px; color: var(--text3)"> / 5</span>';
-    if (d.updatedAt) {
-      document.getElementById('updated-label').textContent = 'last updated: ' + new Date(d.updatedAt).toLocaleDateString('en-CA');
-    }
+    const updatedLabel = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString('en-CA') : '—';
+    document.getElementById('updated-label').textContent = 'last updated: ' + updatedLabel;
     buildCharts(d);
   }
 
   function openModal() {
-    const d = loadFromStorage();
+    const d = normalizeData(currentData);
     document.getElementById('f-week').value = d.week;
     document.getElementById('f-month').value = d.month;
     document.getElementById('f-total').value = d.total;
@@ -629,11 +750,11 @@
     document.getElementById('f-w2').value = d.weeks[1];
     document.getElementById('f-w3').value = d.weeks[2];
     document.getElementById('f-w4').value = d.weeks[3];
-    document.getElementById('f-w4').value = d.weeks[3];
     document.getElementById('f-w5').value = d.weeks[4];
     document.getElementById('f-porthours').value = d.portHours;
     document.getElementById('f-portgoal').value = d.portGoal;
     document.getElementById('f-energy').value = d.energy;
+    document.getElementById('persist-manual').checked = shouldPersistManual();
     document.getElementById('modal').classList.add('open');
   }
 
@@ -643,14 +764,25 @@
 
   function saveData() {
     const n = v => parseFloat(document.getElementById(v).value) || 0;
-    const d = {
+    const persistManual = document.getElementById('persist-manual').checked;
+    const d = normalizeData({
       week: n('f-week'), month: n('f-month'), total: n('f-total'), responses: n('f-responses'),
       interviewing: n('f-interviewing'), offers: n('f-offers'), contacts: n('f-contacts'), followups: n('f-followups'),
       weeks: [n('f-w1'), n('f-w2'), n('f-w3'), n('f-w4'), n('f-w5')],
       portHours: n('f-porthours'), portGoal: n('f-portgoal'), energy: Math.min(5, n('f-energy')),
       updatedAt: new Date().toISOString()
-    };
-    saveToStorage(d);
+    });
+
+    currentData = d;
+    currentSource = persistManual ? 'persisted manual edit' : 'manual session edit';
+    setPersistManual(persistManual);
+    if (persistManual) {
+      saveManualToStorage(d);
+      setStatus('manual changes persisted as fallback');
+    } else {
+      clearManualStorage();
+      setStatus('manual changes applied for this session only');
+    }
     updateUI(d);
     closeModal();
   }
@@ -659,20 +791,7 @@
     if (e.target === this) closeModal();
   });
 
-  if (window.__DASHBOARD_DATA__) {
-    const merged = Object.assign({}, loadFromStorage(), window.__DASHBOARD_DATA__);
-    saveToStorage(merged);
-    updateUI(merged);
-  } else {
-    fetch('data.json?t=' + Date.now())
-    .then(r => { if (!r.ok) throw new Error('no data.json'); return r.json(); })
-    .then(remote => {
-      const merged = Object.assign({}, loadFromStorage(), remote);
-      saveToStorage(merged);
-      updateUI(merged);
-    })
-    .catch(() => updateUI(loadFromStorage()));
-  }
+  refreshLiveData();
 </script>
 </body>
 </html>
