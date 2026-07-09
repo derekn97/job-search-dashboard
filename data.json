@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-07-09T18:52:53.460918+00:00",
-  "week": 99,
-  "month": 64,
-  "total": 402,
+  "updatedAt": "2026-07-09T19:15:42.440630+00:00",
+  "week": 48,
+  "month": 399,
+  "total": 409,
   "responses": 0,
   "interviewing": 0,
   "offers": 0,
@@ -11,7 +11,7 @@
   "weeks": [
     46,
     44,
-    99
+    48
   ],
   "weekLabels": [
     "2026-W23",
