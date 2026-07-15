@@ -543,14 +543,14 @@
 </div>
 
 <script>
-  window.__DASHBOARD_DATA__ = {"updatedAt": "2026-07-15T00:10:45.382285+00:00", "week": 29, "month": 140, "total": 479, "pace_this_week": 72, "responses": 0, "interviewing": 0, "offers": 0, "contacts": 0, "followups": 0, "weeks": [129, 68, 56, 90, 29], "weekLabels": ["2026-W25", "2026-W26", "2026-W27", "2026-W28", "2026-W29"], "portHours": 0.0, "energy": 0};
+  window.__DASHBOARD_DATA__ = {"updatedAt": "2026-07-15T00:13:41.152765+00:00", "week": 30, "month": 141, "total": 480, "pace_this_week": 155, "responses": 0, "interviewing": 0, "offers": 0, "contacts": 0, "followups": 0, "weeks": [129, 68, 56, 90, 30], "weekLabels": ["2026-W25", "2026-W26", "2026-W27", "2026-W28", "2026-W29"], "portHours": 0.0, "energy": 0};
 </script>
 <script>
   const STORAGE_KEY = 'job_dash_v1_manual';
   const PERSIST_MANUAL_KEY = 'job_dash_v1_persist_manual';
 
   const defaults = {
-    week: 0, month: 0, total: 0, responses: 0,
+    week: 0, month: 0, total: 0, weeklyPace: 0,
     interviewing: 0, offers: 0, contacts: 0, followups: 0,
     weeks: [0, 0, 0, 0, 0], weekLabels: null,
     portHours: 0, portGoal: 10, energy: 0,
@@ -720,11 +720,10 @@
 
   function updateUI(d) {
     d = normalizeData(d);
-    const rr = d.total > 0 ? Math.round((d.responses / d.total) * 100) : 0;
     document.getElementById('d-week').textContent = d.week;
     document.getElementById('d-month').textContent = d.month;
     document.getElementById('d-total').textContent = d.total;
-    document.getElementById('d-rr').textContent = rr + '%';
+    document.getElementById('d-rr').textContent = d.pace_this_week;
     document.getElementById('d-interviewing').textContent = d.interviewing;
     document.getElementById('d-offers').textContent = d.offers;
     document.getElementById('d-contacts').textContent = d.contacts;
