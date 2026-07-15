@@ -489,7 +489,7 @@
       </div>
       <div class="form-row">
         <div class="form-field"><label>total (all time)</label><input type="number" id="f-total" min="0" value="9"></div>
-        <div class="form-field"><label>responses received</label><input type="number" id="f-responses" min="0" value="0"></div>
+        <div class="form-field"><label>weekly pace</label><input type="number" id="f-weeklyPace" min="0" value="0"></div>
       </div>
     </div>
 
@@ -740,7 +740,7 @@
     document.getElementById('f-week').value = d.week;
     document.getElementById('f-month').value = d.month;
     document.getElementById('f-total').value = d.total;
-    document.getElementById('f-responses').value = d.responses;
+    document.getElementById('f-weeklyPace').value = d.pace_this_week;
     document.getElementById('f-interviewing').value = d.interviewing;
     document.getElementById('f-offers').value = d.offers;
     document.getElementById('f-contacts').value = d.contacts;
@@ -765,7 +765,7 @@
     const n = v => parseFloat(document.getElementById(v).value) || 0;
     const persistManual = document.getElementById('persist-manual').checked;
     const d = normalizeData({
-      week: n('f-week'), month: n('f-month'), total: n('f-total'), responses: n('f-responses'),
+      week: n('f-week'), month: n('f-month'), total: n('f-total'), weeklyPace: n('f-weeklyPace'),
       interviewing: n('f-interviewing'), offers: n('f-offers'), contacts: n('f-contacts'), followups: n('f-followups'),
       weeks: [n('f-w1'), n('f-w2'), n('f-w3'), n('f-w4'), n('f-w5')],
       portHours: n('f-porthours'), portGoal: n('f-portgoal'), energy: Math.min(5, n('f-energy')),
