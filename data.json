@@ -1,12 +1,13 @@
 {
-  "updatedAt": "2026-07-21T21:13:26.174416+00:00",
-  "week": 13,
-  "month": 188,
-  "total": 527,
-  "pace_this_week": 32,
+  "updatedAt": "2026-07-21T23:12:47.535419+00:00",
+  "week": 17,
+  "month": 192,
+  "total": 531,
+  "pace_this_week": 42,
   "responses": 4,
   "interviewing": 0,
   "offers": 0,
+  "rejected": 4,
   "contacts": 0,
   "followups": 0,
   "weeks": [
@@ -14,7 +15,7 @@
     56,
     90,
     64,
-    13
+    17
   ],
   "weekLabels": [
     "2026-W26",

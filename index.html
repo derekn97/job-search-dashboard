@@ -543,7 +543,7 @@
 </div>
 
 <script>
-  window.__DASHBOARD_DATA__ = {"updatedAt": "2026-07-21T21:13:26.174416+00:00", "week": 13, "month": 188, "total": 527, "pace_this_week": 32, "responses": 4, "interviewing": 0, "offers": 0, "contacts": 0, "followups": 0, "weeks": [68, 56, 90, 64, 13], "weekLabels": ["2026-W26", "2026-W27", "2026-W28", "2026-W29", "2026-W30"], "portHours": 0.0, "energy": 0};
+  window.__DASHBOARD_DATA__ = {"updatedAt": "2026-07-21T23:12:47.535419+00:00", "week": 17, "month": 192, "total": 531, "pace_this_week": 42, "responses": 4, "interviewing": 0, "offers": 0, "rejected": 4, "contacts": 0, "followups": 0, "weeks": [68, 56, 90, 64, 17], "weekLabels": ["2026-W26", "2026-W27", "2026-W28", "2026-W29", "2026-W30"], "portHours": 0.0, "energy": 0};
 </script>
 <script>
   const STORAGE_KEY = 'job_dash_v1_manual';
@@ -661,9 +661,9 @@
     charts.funnelChart = new Chart(document.getElementById('funnelChart'), {
       type: 'bar',
       data: {
-        labels: ['Applied','Interviewing','Offers'],
+        labels: ['Applied','Interviewing','Offers', 'Rejected'],
         datasets: [{
-          data: [d.total, d.interviewing, d.offers],
+          data: [d.total, d.interviewing, d.offers, d.rejected],
           backgroundColor: ['#9d97f0','#2ec99a','#f0a030'],
           borderRadius: 4,
           borderSkipped: false

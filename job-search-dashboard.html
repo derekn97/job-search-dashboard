@@ -659,9 +659,9 @@
     charts.funnelChart = new Chart(document.getElementById('funnelChart'), {
       type: 'bar',
       data: {
-        labels: ['Applied','Interviewing','Offers'],
+        labels: ['Applied','Interviewing','Offers', 'Rejected'],
         datasets: [{
-          data: [d.total, d.interviewing, d.offers],
+          data: [d.total, d.interviewing, d.offers, d.rejected],
           backgroundColor: ['#9d97f0','#2ec99a','#f0a030'],
           borderRadius: 4,
           borderSkipped: false
