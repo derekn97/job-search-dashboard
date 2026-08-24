@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-08-21T22:52:35.690491+00:00",
-  "week": 9,
-  "month": 12,
-  "total": 626,
-  "pace_this_week": 9,
+  "updatedAt": "2026-08-24T18:32:36.501436+00:00",
+  "week": 2,
+  "month": 14,
+  "total": 628,
+  "pace_this_week": 10,
   "responses": 4,
   "interviewing": 0,
   "offers": 0,
@@ -11,18 +11,18 @@
   "contacts": 0,
   "followups": 0,
   "weeks": [
-    64,
     74,
     24,
     3,
-    9
+    9,
+    2
   ],
   "weekLabels": [
-    "2026-W29",
     "2026-W30",
     "2026-W31",
     "2026-W33",
-    "2026-W34"
+    "2026-W34",
+    "2026-W35"
   ],
   "portHours": 0.0,
   "energy": 0
